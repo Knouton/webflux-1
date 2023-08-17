@@ -14,6 +14,8 @@ import java.util.UUID;
 
 public class JwtTest {
 
+	private static final String TOKEN = "b5f59337a612a2a7dc07328f3e7d1a04722967c7f06df20a499a7d3f91ff2a7e";
+
 	public static String generateJwt(UserEntity userEntity) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("role", userEntity.getRole());
@@ -34,7 +36,7 @@ public class JwtTest {
 	}
 
 	private static Key getSigningKey() {
-		byte[] keyBytes = Decoders.BASE64.decode("b5f59337a612a2a7dc07328f3e7d1a04722967c7f06df20a499a7d3f91ff2a7e");
+		byte[] keyBytes = Decoders.BASE64.decode(TOKEN);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 }

@@ -18,7 +18,7 @@ public class BearerTokenServerAuthenticationConverter implements ServerAuthentic
 			authValue -> Mono.justOrEmpty(authValue.substring(BEARER_PREFIX.length()));
 
 	@Override
-	public Mono<Authentication> convert(final ServerWebExchange exchange) {
+	public Mono<Authentication> convert(ServerWebExchange exchange) {
 		return extractHeader(exchange)
 				.flatMap(getBearerValue)
 				.flatMap(jwtHandler::check)

@@ -64,25 +64,14 @@ class UserServiceTest {
 	@Test
 	void registerUser_Success() {
 		given(userRepository.save(any(UserEntity.class))).willReturn(Mono.just(userEntity));
-		given(userRepository.existsByUsername(any(String.class))).willReturn(Mono.just(false));
 		//when(userRepository.save(any(UserEntity.class))).thenReturn(Mono.just(userEntity));
+		given(userRepository.existsByUsername(any(String.class))).willReturn(Mono.just(false));
 
 		val result = userService.registerUser(userDto);
 
 		assertThat(result.block()).isEqualTo(userDto);
 	}
 
-	/*@Test
-	void registerUserAlreadyExistsError_UnSuccess() {
-		given(userRepository.save(any(UserEntity.class))).willReturn(Mono.just(userEntity));
-		given(userRepository.existsByUsername(any(String.class))).willReturn(Mono.just(true));
-
-		val result = userService.registerUser(userDto);
-
-
-		assertThatThrownBy(() -> userService.registerUser(userDto))
-				.isInstanceOf(Mono.error());
-	}*/
 
 	@Test
 	void getUserById_Success() {

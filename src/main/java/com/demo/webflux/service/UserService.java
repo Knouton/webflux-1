@@ -42,7 +42,6 @@ public class UserService {
 	}
 
 	public Mono<UserDto> getUserById(Long id) {
-		System.out.println("getUserById " + id);
 		return userRepository.findById(id).map(mapper::map);
 	}
 

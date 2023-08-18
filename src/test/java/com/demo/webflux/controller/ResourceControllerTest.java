@@ -63,7 +63,7 @@ class ResourceControllerTest {
 
 	@Test
 	//@WithMockUser(authorities = USER)
-	void getResourceByJwtToken_Success() {
+	void getResourceByJwt_Success() {
 		when(userService.getUserById(any(Long.class))).thenReturn(Mono.just(userDto));
 		when(resourceService.getResourceById(any(Long.class))).thenReturn(Mono.just(dto));
 
@@ -87,7 +87,7 @@ class ResourceControllerTest {
 	}
 
 	@Test
-	void createResourceByJwtToken_Success() {
+	void createResourceByJwt_Success() {
 	}
 
 	@Test

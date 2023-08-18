@@ -3,6 +3,7 @@ package com.demo.webflux.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 import com.demo.webflux.config.JwtTest;
 import com.demo.webflux.dto.AuthReqDto;
 import com.demo.webflux.dto.AuthRespDto;
@@ -13,7 +14,9 @@ import com.demo.webflux.security.model.TokenDetails;
 import com.demo.webflux.security.token.SecurityService;
 import com.demo.webflux.service.ResourceService;
 import com.demo.webflux.service.UserService;
+import io.jsonwebtoken.Claims;
 import java.util.Collections;
+import java.util.Date;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -60,7 +64,7 @@ class AuthControllerTest {
 		userDto = new UserDto();
 		userDto.setId(1L);
 		userDto.setUsername("test");
-		userDto.setPassword("test");
+		userDto.setPassword("100");
 		userDto.setFirstName("firstName");
 		userDto.setLastName("lastName");
 
@@ -71,13 +75,19 @@ class AuthControllerTest {
 		respDto = new AuthRespDto();
 		respDto.setUserId(1L);
 		respDto.setToken("token");
+		respDto.setIssueAt(new Date());
+		Long expirationTimeMillis = 50000 * 1000L;
+		Date expirationDate = new Date(new Date().getTime() + expirationTimeMillis);
+		respDto.setExpiresAt(expirationDate);
 
 		tokenDetails = new TokenDetails();
 		tokenDetails.setUserId(1L);
 		tokenDetails.setToken(JwtTest.generateJwt(userEntity));
+		tokenDetails.setIssuedAt(new Date());
+		tokenDetails.setExpiresAt(expirationDate);
 	}
 	@Test
-	void register() {
+	void register_Success() {
 		given(userService.registerUser(any(UserDto.class))).willReturn(Mono.just(userDto));
 
 		webTestClient
@@ -97,7 +107,7 @@ class AuthControllerTest {
 	}
 
 	@Test
-	void login() {
+	void login_Success() {
 		tokenDetails.setToken("token");
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
 
@@ -116,18 +126,18 @@ class AuthControllerTest {
 	}
 
 	@Test
-	void getUserInfo() {
+	void getUserInfoByJwt_Success() {
 		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
-		given(passwordEncoder.matches(any(String.class),any(String.class))).willReturn(true);
+		given(passwordEncoder.matches(any(String.class), any(String.class))).willReturn(true);
+		String token = tokenDetails.getToken();
+		JwtTest.check(token);
 
 		webTestClient
 				.get()
 				.uri("/api/auth/info")
-				.headers(http -> http.setBearerAuth(tokenDetails.getToken()))
-				//.contentType(MediaType.APPLICATION_JSON)
+				.headers(http -> http.setBearerAuth(token))
 				.accept(MediaType.APPLICATION_JSON)
-				//.body(Mono.just(reqDto), AuthReqDto.class)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()

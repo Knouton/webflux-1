@@ -1,12 +1,10 @@
 package com.demo.webflux.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import com.demo.webflux.dto.UserDto;
 import com.demo.webflux.entity.UserEntity;
-import com.demo.webflux.exception.UserAlreadyExists;
 import com.demo.webflux.mapper.UserMapper;
 import com.demo.webflux.repository.UserRepository;
 import java.time.LocalDateTime;

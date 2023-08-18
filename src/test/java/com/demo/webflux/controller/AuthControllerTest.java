@@ -131,7 +131,6 @@ class AuthControllerTest {
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
 		given(passwordEncoder.matches(any(String.class), any(String.class))).willReturn(true);
 		String token = tokenDetails.getToken();
-		JwtTest.check(token);
 
 		webTestClient
 				.get()

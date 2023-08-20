@@ -43,8 +43,6 @@ class AuthControllerTest {
 	private UserService userService;
 	@MockBean
 	private SecurityService securityService;
-	@MockBean
-	private PasswordEncoder passwordEncoder;
 
 
 	UserEntity userEntity;
@@ -67,6 +65,7 @@ class AuthControllerTest {
 		userDto.setPassword("100");
 		userDto.setFirstName("firstName");
 		userDto.setLastName("lastName");
+		userDto.setEnabled(true);
 
 		reqDto = new AuthReqDto();
 		reqDto.setUsername("100");
@@ -129,7 +128,6 @@ class AuthControllerTest {
 	void getUserInfoByJwt_Success() {
 		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
-		given(passwordEncoder.matches(any(String.class), any(String.class))).willReturn(true);
 		String token = tokenDetails.getToken();
 
 		webTestClient
@@ -141,7 +139,19 @@ class AuthControllerTest {
 				.expectStatus().isOk()
 				.expectBody()
 				.consumeWith(System.out::println)
-				.jsonPath("$.user_id").isEqualTo(userDto.getId())
+				.jsonPath("$.id").isEqualTo(userDto.getId())
 				.jsonPath("$.username").isEqualTo(userDto.getUsername());
+	}
+
+	@Test
+	void getUserInfo_UnSuccess() {
+		webTestClient
+				.get()
+				.uri("/api/auth/info")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isUnauthorized()
+				.expectBody()
+				.consumeWith(System.out::println);
 	}
 }

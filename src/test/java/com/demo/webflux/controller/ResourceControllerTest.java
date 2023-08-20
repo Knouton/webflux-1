@@ -1,6 +1,7 @@
 package com.demo.webflux.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.demo.webflux.config.JwtTest;
@@ -8,10 +9,12 @@ import com.demo.webflux.dto.ResourceDto;
 import com.demo.webflux.dto.UserDto;
 import com.demo.webflux.entity.UserEntity;
 import com.demo.webflux.entity.UserRole;
-import com.demo.webflux.repository.ResourceRepository;
+import com.demo.webflux.security.model.TokenDetails;
+import com.demo.webflux.security.token.SecurityService;
 import com.demo.webflux.service.ResourceService;
 import com.demo.webflux.service.UserService;
 import java.util.Collections;
+import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -36,17 +40,17 @@ class ResourceControllerTest {
 
 	@MockBean
 	private UserService userService;
-
 	@MockBean
-	private ResourceRepository repository;
+	private SecurityService securityService;
 
-	ResourceDto dto;
+	ResourceDto resourceDto;
 	UserEntity userEntity;
 	UserDto userDto;
+	TokenDetails tokenDetails;
 
 	@BeforeEach
 	void init() {
-		dto = new ResourceDto(1L, "value", "path");
+		resourceDto = new ResourceDto(1L, "value", "path");
 
 		userEntity = new UserEntity();
 		userEntity.setId(1L);
@@ -57,41 +61,85 @@ class ResourceControllerTest {
 		userDto = new UserDto();
 		userDto.setId(1L);
 		userDto.setUsername("test");
-		userDto.setRole(UserRole.USER);
+		userDto.setPassword("100");
+		userDto.setFirstName("firstName");
+		userDto.setLastName("lastName");
 		userDto.setEnabled(true);
+
+		Long expirationTimeMillis = 50000 * 1000L;
+		Date expirationDate = new Date(new Date().getTime() + expirationTimeMillis);
+		tokenDetails = new TokenDetails();
+		tokenDetails.setUserId(1L);
+		tokenDetails.setToken(JwtTest.generateJwt(userEntity));
+		tokenDetails.setIssuedAt(new Date());
+		tokenDetails.setExpiresAt(expirationDate);
 	}
 
 	@Test
-	//@WithMockUser(authorities = USER)
 	void getResourceByJwt_Success() {
-		when(userService.getUserById(any(Long.class))).thenReturn(Mono.just(userDto));
-		when(resourceService.getResourceById(any(Long.class))).thenReturn(Mono.just(dto));
+		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
+		given(resourceService.getResourceById(any(Long.class))).willReturn(Mono.just(resourceDto));
+		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
 
 		webTestClient
-				//mutateWith(mockJwt().jwt(jwt -> jwt.claims(claims -> claims.remove("scope"))))
 				.get()
-				.uri("/api/resources/{id}", Collections.singletonMap("id", dto.getId()))
-				.headers(http -> http.setBearerAuth(JwtTest.generateJwt(userEntity)))
+				.uri("/resource/1")
+				.headers(http -> http.setBearerAuth(tokenDetails.getToken()))
+				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
 				.consumeWith(System.out::println)
-				.jsonPath("$.id").isEqualTo(dto.getId())
-				.jsonPath("$.value").isEqualTo(dto.getValue())
-				.jsonPath("$.path").isEqualTo(dto.getPath());
+				.jsonPath("$.id").isEqualTo(resourceDto.getId())
+				.jsonPath("$.value").isEqualTo(resourceDto.getValue())
+				.jsonPath("$.path").isEqualTo(resourceDto.getPath());
 	}
 
 	@Test
 	void getResource_UnSuccess() {
-
+		webTestClient
+				.get()
+				.uri("/resource/1")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isUnauthorized()
+				.expectBody()
+				.consumeWith(System.out::println);
 	}
 
 	@Test
 	void createResourceByJwt_Success() {
+		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
+		given(resourceService.saveResource(any(ResourceDto.class))).willReturn(Mono.just(resourceDto));
+		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
+
+		webTestClient
+				.post()
+				.uri("/resource")
+				.headers(http -> http.setBearerAuth(tokenDetails.getToken()))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(Mono.just(resourceDto), ResourceDto.class)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.consumeWith(System.out::println)
+				.jsonPath("$.id").isEqualTo(resourceDto.getId())
+				.jsonPath("$.value").isEqualTo(resourceDto.getValue())
+				.jsonPath("$.path").isEqualTo(resourceDto.getPath());
 	}
 
 	@Test
 	void createResource_UnSuccess() {
-
+		webTestClient
+				.post()
+				.uri("/resource")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(Mono.just(resourceDto), ResourceDto.class)
+				.exchange()
+				.expectStatus().isUnauthorized()
+				.expectBody()
+				.consumeWith(System.out::println);
 	}
 }

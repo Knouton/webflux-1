@@ -19,13 +19,11 @@ public class ResourceController {
 
 	@GetMapping("/{id}")
 	public Mono<ResourceDto> getResource(@PathVariable Long id) {
-
 		return service.getResourceById(id);
 	}
 
 	@PostMapping
 	public Mono<ResourceDto> createResource(@RequestBody ResourceDto dto) {
-
 		return service.saveResource(dto);
 	}
 

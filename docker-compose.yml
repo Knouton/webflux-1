@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:13.3
+    ports:
+      - "5444:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: webflux_demo
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.3.1
+    container_name: node_exporter
+    pid: host
+    ports:
+      - "9100:9100"
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin

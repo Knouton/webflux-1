@@ -3,11 +3,11 @@ server:
 
 spring:
   r2dbc:
-    url: r2dbc:pool:postgres://localhost:5432/webflux_demo
+    url: r2dbc:pool:postgres://${DATASOURCE_HOST:localhost}:5444/webflux_demo
     username: postgres
     password: 123456
   flyway:
-    url: jdbc:postgresql://localhost:5432/webflux_demo
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5444/webflux_demo
     locations: classpath:db/migration
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
@@ -19,5 +19,25 @@ jwt:
       iteration: 64
       keylength: 256
   secret: b5f59337a612a2a7dc07328f3e7d1a04722967c7f06df20a499a7d3f91ff2a7e
-  expiration: 3600
+  expiration: 999999999
   issuer: issuer
+
+management:
+  endpoints.web.exposure.include: 'prometheus, health'
+  tracing:
+    sampling:
+      probability: 1.0
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+
+    tags:
+      application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'

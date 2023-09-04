@@ -26,7 +26,7 @@ public class WebSecurityConfig {
 	@Value("${jwt.secret}")
 	private String secret;
 
-	private final String [] publicRoutes = {"/api/auth/register", "/api/auth/login"};
+	private final String [] publicRoutes = {"/api/auth/register", "/api/auth/login", "/actuator/*"};
 
 	@Bean
 	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, AuthenticationManager authenticationManager) {

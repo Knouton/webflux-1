@@ -9,6 +9,8 @@ import com.demo.webflux.security.model.CustomPrincipal;
 import com.demo.webflux.security.token.SecurityService;
 import com.demo.webflux.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -27,18 +30,24 @@ public class AuthController {
 
 	@PostMapping("/register")
 	public Mono<UserDto> register(@RequestBody UserDto userDto) {
-		return userService.registerUser(userDto);
+		log.info("register user: {}", userDto.getUsername());
+		Mono<UserDto> registerUser = userService.registerUser(userDto);
+		log.info("Successful register user: {}", userDto.getUsername());
+		return registerUser;
 	}
 
 	@PostMapping("/login")
 	public Mono<AuthRespDto> login(@RequestBody AuthReqDto reqDto) {
-		return securityService.authenticate(reqDto.getUsername(), reqDto.getPassword())
+		log.info("login user: {}", reqDto.getUsername());
+		Mono<AuthRespDto> respDto = securityService.authenticate(reqDto.getUsername(), reqDto.getPassword())
 				.flatMap(tokenDetails -> Mono.just(AuthRespDto.builder()
 						                                   .userId(tokenDetails.getUserId())
 						                                   .token(tokenDetails.getToken())
 						                                   .issueAt(tokenDetails.getIssuedAt())
 						                                   .expiresAt(tokenDetails.getExpiresAt())
 						                                   .build()));
+		log.info("Successful login user: {}", reqDto.getUsername());
+		return respDto;
 	}
 
 	@GetMapping("/info")

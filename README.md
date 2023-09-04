@@ -1,5 +1,46 @@
 # webflux-1
-Общий принцип работы:
+**Настройки и запуск:**
+
+Запустить docker:  docker-compose -f docker-compose.yml up
+
+Если смотреть через интерфейс(Docker Desktop) то должно получиться так:
+![image](https://github.com/Knouton/webflux-1/assets/19289934/a4289efc-8e2c-47b4-908d-d395c45cdd9d)
+
+**ссылки:**
+
+prometheus:
+
+http://localhost:9001/actuator/prometheus
+
+http://localhost:9090/metrics
+
+node_exporter:
+
+http://localhost:9100/metrics
+
+grafana:
+
+http://localhost:9090/metrics (admin/admin)
+
+В графану подключить data_source:
+
+loki: http://host.docker.internal:3100
+
+prometheus: http://host.docker.internal:9090
+
+![image](https://github.com/Knouton/webflux-1/assets/19289934/bb8528da-ea66-4321-b233-c259b22b872a)
+
+
+загрузить дашборды по пути: config\dashboards
+
+4701_rev10.json — стандртный по JVM
+
+webflux_test1.json — кастомный, пример того что он показывает:
+![image](https://github.com/Knouton/webflux-1/assets/19289934/1260e4a1-6389-4b24-bfab-14faa2daf307)
+
+
+
+**Общий принцип работы приложения:**
 
 При запуске с помощью flyway создаются таблицы в бд postgreSQL на основе скриптов по пути src\main\resources\db
 

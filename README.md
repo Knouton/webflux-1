@@ -34,6 +34,7 @@ prometheus: http://host.docker.internal:9090
 загрузить дашборды по пути: config\dashboards
 
 4701_rev10.json — стандртный по JVM
+10007_rev5.json — стандартный по метрикам системы
 
 webflux_test1.json — кастомный, пример того что он показывает:
 ![image](https://github.com/Knouton/webflux-1/assets/19289934/1260e4a1-6389-4b24-bfab-14faa2daf307)

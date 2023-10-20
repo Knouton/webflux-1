@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomPrincipal implements Principal {
-	private Long id;
+	private String id;
 	private String name;
 }

@@ -3,12 +3,11 @@ package com.demo.webflux.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ResourceDto {
-	private String id;
-	private String value;
-	private String path;
+@NoArgsConstructor
+public class AuthEvent {
+	String message;
 }

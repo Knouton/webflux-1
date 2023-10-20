@@ -1,23 +1,18 @@
 package com.demo.webflux.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 import com.demo.webflux.config.JwtTest;
 import com.demo.webflux.dto.AuthReqDto;
 import com.demo.webflux.dto.AuthRespDto;
 import com.demo.webflux.dto.UserDto;
-import com.demo.webflux.entity.UserEntity;
+import com.demo.webflux.entity.mongo.User;
+import com.demo.webflux.entity.postgres.UserEntity;
 import com.demo.webflux.entity.UserRole;
 import com.demo.webflux.security.model.TokenDetails;
 import com.demo.webflux.security.token.SecurityService;
-import com.demo.webflux.service.ResourceService;
-import com.demo.webflux.service.UserService;
-import io.jsonwebtoken.Claims;
-import java.util.Collections;
+import com.demo.webflux.service.mongo.UserServiceMongo;
 import java.util.Date;
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -40,27 +31,28 @@ class AuthControllerTest {
 	@Autowired
 	private WebTestClient webTestClient;
 	@MockBean
-	private UserService userService;
+	private UserServiceMongo serviceMongo;
+	//private UserServiceSql userServiceSql;
 	@MockBean
 	private SecurityService securityService;
 
 
-	UserEntity userEntity;
+	User userEntity;
 	UserDto userDto;
 	AuthReqDto reqDto;
 	AuthRespDto respDto;
 	TokenDetails tokenDetails;
 	@BeforeEach
 	void init() {
-		userEntity = new UserEntity();
-		userEntity.setId(1L);
+		userEntity = new User();
+		userEntity.setId("");
 		userEntity.setUsername("test");
 		userEntity.setPassword("100");
 		userEntity.setRole(UserRole.USER);
 		userEntity.setEnabled(true);
 
 		userDto = new UserDto();
-		userDto.setId(1L);
+		userDto.setId("1");
 		userDto.setUsername("test");
 		userDto.setPassword("100");
 		userDto.setFirstName("firstName");
@@ -72,7 +64,7 @@ class AuthControllerTest {
 		reqDto.setPassword("100");
 
 		respDto = new AuthRespDto();
-		respDto.setUserId(1L);
+		respDto.setUserId("1");
 		respDto.setToken("token");
 		respDto.setIssueAt(new Date());
 		Long expirationTimeMillis = 50000 * 1000L;
@@ -80,14 +72,14 @@ class AuthControllerTest {
 		respDto.setExpiresAt(expirationDate);
 
 		tokenDetails = new TokenDetails();
-		tokenDetails.setUserId(1L);
+		tokenDetails.setUserId("1");
 		tokenDetails.setToken(JwtTest.generateJwt(userEntity));
 		tokenDetails.setIssuedAt(new Date());
 		tokenDetails.setExpiresAt(expirationDate);
 	}
 	@Test
 	void register_Success() {
-		given(userService.registerUser(any(UserDto.class))).willReturn(Mono.just(userDto));
+		given(serviceMongo.registerUser(any(UserDto.class))).willReturn(Mono.just(userDto));
 
 		webTestClient
 				.post()
@@ -126,7 +118,7 @@ class AuthControllerTest {
 
 	@Test
 	void getUserInfoByJwt_Success() {
-		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
+		given(serviceMongo.getUserById(any(String.class))).willReturn(Mono.just(userDto));
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
 		String token = tokenDetails.getToken();
 

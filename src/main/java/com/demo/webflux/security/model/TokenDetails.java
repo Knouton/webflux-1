@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TokenDetails {
-	private Long userId;
+	private String userId;
 	private String token;
 	private Date issuedAt;
 	private Date expiresAt;

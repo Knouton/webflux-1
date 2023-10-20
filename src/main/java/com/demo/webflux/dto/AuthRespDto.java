@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class AuthRespDto {
-	private Long userId;
+	private String userId;
 	private String token;
 	private Date issueAt;
 	private Date expiresAt;

@@ -11,7 +11,20 @@ spring:
     locations: classpath:db/migration
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
-
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/webflux_test
+      database: webflux_test
+      host: localhost
+      port: 21017
+  kafka:
+    group.id: adapter_test_group
+    request.timeout: 650000
+    max.poll.interval: 650000
+    bootstrap.servers: localhost:29092
+    producer:
+      topic:
+        load.auth.event: auth-event-req
 jwt:
   password:
     encoder:

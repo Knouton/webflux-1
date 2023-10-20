@@ -2,18 +2,17 @@ package com.demo.webflux.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 import com.demo.webflux.config.JwtTest;
 import com.demo.webflux.dto.ResourceDto;
 import com.demo.webflux.dto.UserDto;
-import com.demo.webflux.entity.UserEntity;
+import com.demo.webflux.entity.mongo.User;
+import com.demo.webflux.entity.postgres.UserEntity;
 import com.demo.webflux.entity.UserRole;
 import com.demo.webflux.security.model.TokenDetails;
 import com.demo.webflux.security.token.SecurityService;
-import com.demo.webflux.service.ResourceService;
-import com.demo.webflux.service.UserService;
-import java.util.Collections;
+import com.demo.webflux.service.mongo.ResourceServiceMongo;
+import com.demo.webflux.service.mongo.UserServiceMongo;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,30 +35,32 @@ class ResourceControllerTest {
 	@Autowired
 	private WebTestClient webTestClient;
 	@MockBean
-	private ResourceService resourceService;
+	ResourceServiceMongo resourceServiceMongo;
+	//private ResourceServiceSql resourceServiceSql;
 
 	@MockBean
-	private UserService userService;
+	//private UserServiceSql userServiceSql;
+	private UserServiceMongo userServiceMongo;
 	@MockBean
 	private SecurityService securityService;
 
 	ResourceDto resourceDto;
-	UserEntity userEntity;
+	User user;
 	UserDto userDto;
 	TokenDetails tokenDetails;
 
 	@BeforeEach
 	void init() {
-		resourceDto = new ResourceDto(1L, "value", "path");
+		resourceDto = new ResourceDto("1", "value", "path");
 
-		userEntity = new UserEntity();
-		userEntity.setId(1L);
-		userEntity.setUsername("test");
-		userEntity.setRole(UserRole.USER);
-		userEntity.setEnabled(true);
+		user = new User();
+		user.setId("1");
+		user.setUsername("test");
+		user.setRole(UserRole.USER);
+		user.setEnabled(true);
 
 		userDto = new UserDto();
-		userDto.setId(1L);
+		userDto.setId("1");
 		userDto.setUsername("test");
 		userDto.setPassword("100");
 		userDto.setFirstName("firstName");
@@ -69,16 +70,16 @@ class ResourceControllerTest {
 		Long expirationTimeMillis = 50000 * 1000L;
 		Date expirationDate = new Date(new Date().getTime() + expirationTimeMillis);
 		tokenDetails = new TokenDetails();
-		tokenDetails.setUserId(1L);
-		tokenDetails.setToken(JwtTest.generateJwt(userEntity));
+		tokenDetails.setUserId("1");
+		tokenDetails.setToken(JwtTest.generateJwt(user));
 		tokenDetails.setIssuedAt(new Date());
 		tokenDetails.setExpiresAt(expirationDate);
 	}
 
 	@Test
 	void getResourceByJwt_Success() {
-		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
-		given(resourceService.getResourceById(any(Long.class))).willReturn(Mono.just(resourceDto));
+		given(userServiceMongo.getUserById(any(String.class))).willReturn(Mono.just(userDto));
+		given(resourceServiceMongo.getResourceById(any(String.class))).willReturn(Mono.just(resourceDto));
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
 
 		webTestClient
@@ -109,8 +110,8 @@ class ResourceControllerTest {
 
 	@Test
 	void createResourceByJwt_Success() {
-		given(userService.getUserById(any(Long.class))).willReturn(Mono.just(userDto));
-		given(resourceService.saveResource(any(ResourceDto.class))).willReturn(Mono.just(resourceDto));
+		given(userServiceMongo.getUserById(any(String.class))).willReturn(Mono.just(userDto));
+		given(resourceServiceMongo.saveResource(any(ResourceDto.class))).willReturn(Mono.just(resourceDto));
 		given(securityService.authenticate(any(String.class), any(String.class))).willReturn(Mono.just(tokenDetails));
 
 		webTestClient

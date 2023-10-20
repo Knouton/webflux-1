@@ -1,15 +1,13 @@
-package com.demo.webflux.service;
+package com.demo.webflux.service.postgres;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static reactor.core.publisher.Mono.when;
 import com.demo.webflux.dto.ResourceDto;
-import com.demo.webflux.dto.UserDto;
-import com.demo.webflux.entity.ResourceEntity;
-import com.demo.webflux.entity.UserEntity;
-import com.demo.webflux.mapper.ResourceMapper;
-import com.demo.webflux.repository.ResourceRepository;
+import com.demo.webflux.entity.postgres.ResourceEntity;
+import com.demo.webflux.mapper.sql.ResourceMapperSql;
+import com.demo.webflux.repository.postgres.ResourceRepositorySql;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +18,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(SpringExtension.class)
-class ResourceServiceTest {
+class ResourceServiceSqlTest {
 
 	@Mock
-	ResourceRepository repository;
+	ResourceRepositorySql repository;
 	@Mock
-	ResourceMapper resourceMapper;
+	ResourceMapperSql resourceMapperSql;
 	@InjectMocks
-	ResourceService service;
+	ResourceServiceSql service;
 
 	ResourceEntity resourceEntity;
 	ResourceDto resourceDto;
@@ -40,12 +38,12 @@ class ResourceServiceTest {
 		resourceEntity.setValue("value");
 
 		resourceDto = new ResourceDto();
-		resourceDto.setId(1L);
+		resourceDto.setId("1");
 		resourceDto.setPath("path");
 		resourceDto.setValue("value");
 
-		given(resourceMapper.map(any(ResourceEntity.class))).willReturn(resourceDto);
-		given(resourceMapper.map(any(ResourceDto.class))).willReturn(resourceEntity);
+		given(resourceMapperSql.map(any(ResourceEntity.class))).willReturn(resourceDto);
+		given(resourceMapperSql.map(any(ResourceDto.class))).willReturn(resourceEntity);
 	}
 
 	@Test

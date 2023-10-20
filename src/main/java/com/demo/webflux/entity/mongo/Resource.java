@@ -1,20 +1,20 @@
-package com.demo.webflux.entity;
+package com.demo.webflux.entity.mongo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "resources")
-public class ResourceEntity {
+public class Resource {
 	@Id
-	private Long id;
+	private String id;
 	private String value;
 	private String path;
 }

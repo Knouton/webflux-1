@@ -1,5 +1,6 @@
-package com.demo.webflux.entity;
+package com.demo.webflux.entity.mongo;
 
+import com.demo.webflux.entity.UserRole;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,16 +8,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Data
+@Document
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("users")
-public class UserEntity {
+@Data
+public class User {
 	@Id
-	private Long id;
+	private String id;
 	private String username;
 	private String password;
 	private UserRole role;

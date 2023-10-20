@@ -1,15 +1,15 @@
 package com.demo.webflux.controller;
 
+import com.demo.webflux.dto.AuthEvent;
 import com.demo.webflux.dto.AuthReqDto;
 import com.demo.webflux.dto.AuthRespDto;
 import com.demo.webflux.dto.UserDto;
-import com.demo.webflux.entity.UserEntity;
-import com.demo.webflux.mapper.UserMapper;
 import com.demo.webflux.security.model.CustomPrincipal;
 import com.demo.webflux.security.token.SecurityService;
-import com.demo.webflux.service.UserService;
+import com.demo.webflux.service.adapter.AuthEventService;
+import com.demo.webflux.service.mongo.UserServiceMongo;
+import com.demo.webflux.service.postgres.UserServiceSql;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,18 +26,28 @@ import reactor.core.publisher.Mono;
 public class AuthController {
 
 	private final SecurityService securityService;
-	private final UserService userService;
+	private final UserServiceSql userServiceSql;
+	private final UserServiceMongo userServiceMongo;
+
+	private final AuthEventService authEventService;
 
 	@PostMapping("/register")
 	public Mono<UserDto> register(@RequestBody UserDto userDto) {
 		log.info("register user: {}", userDto.getUsername());
-		Mono<UserDto> registerUser = userService.registerUser(userDto);
+		//Mono<UserDto> registerUser = userServiceSql.registerUser(userDto);
+		Mono<UserDto> registerUser = userServiceMongo.registerUser(userDto);
 		log.info("Successful register user: {}", userDto.getUsername());
+
+		authEventService.sendAuthEvent(
+				new AuthEvent("user " + userDto.getUsername() + " successful created"));
 		return registerUser;
 	}
 
 	@PostMapping("/login")
 	public Mono<AuthRespDto> login(@RequestBody AuthReqDto reqDto) {
+		authEventService.sendAuthEvent(
+				new AuthEvent("unknown user try to login" + reqDto.getUsername()));
+
 		log.info("login user: {}", reqDto.getUsername());
 		Mono<AuthRespDto> respDto = securityService.authenticate(reqDto.getUsername(), reqDto.getPassword())
 				.flatMap(tokenDetails -> Mono.just(AuthRespDto.builder()
@@ -47,6 +57,9 @@ public class AuthController {
 						                                   .expiresAt(tokenDetails.getExpiresAt())
 						                                   .build()));
 		log.info("Successful login user: {}", reqDto.getUsername());
+
+		authEventService.sendAuthEvent(
+				new AuthEvent("user " + reqDto.getUsername() + " successful login"));
 		return respDto;
 	}
 
@@ -54,7 +67,7 @@ public class AuthController {
 	public Mono<UserDto> getUserInfo(Authentication authentication) {
 		CustomPrincipal customPrincipal = (CustomPrincipal) authentication.getPrincipal();
 
-		return userService.getUserById(customPrincipal.getId());
+		return userServiceMongo.getUserById(customPrincipal.getId());
 	}
 
 }

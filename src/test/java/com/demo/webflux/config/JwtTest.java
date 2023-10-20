@@ -1,11 +1,7 @@
 package com.demo.webflux.config;
 
-import com.demo.webflux.entity.UserEntity;
-import com.demo.webflux.exception.AuthException;
-import com.demo.webflux.exception.UnauthorizedException;
-import com.demo.webflux.security.model.VerificationResult;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
+import com.demo.webflux.entity.mongo.User;
+import com.demo.webflux.entity.postgres.UserEntity;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -15,16 +11,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import reactor.core.publisher.Mono;
 
 public class JwtTest {
 
 	private static final String TOKEN = "b5f59337a612a2a7dc07328f3e7d1a04722967c7f06df20a499a7d3f91ff2a7e";
 
-	public static String generateJwt(UserEntity userEntity) {
+	public static String generateJwt(User user) {
 		Map<String, Object> claims = new HashMap<>();
-		claims.put("role", userEntity.getRole());
-		claims.put("username", userEntity.getUsername());
+		claims.put("role", user.getRole());
+		claims.put("username", user.getUsername());
 
 		Long expirationTimeMillis = 3600 * 1000L;
 		Date expirationDate = new Date(new Date().getTime() + expirationTimeMillis);
@@ -32,7 +27,7 @@ public class JwtTest {
 		return Jwts.builder()
 				.setClaims(claims)
 				.setIssuer("issuer")
-				.setSubject(userEntity.getId().toString())
+				.setSubject(user.getId().toString())
 				.setIssuedAt(new Date())
 				.setId(UUID.randomUUID().toString())
 				.setExpiration(expirationDate)

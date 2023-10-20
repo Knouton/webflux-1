@@ -1,9 +1,11 @@
 package com.demo.webflux.security.token;
 
-import com.demo.webflux.entity.UserEntity;
+import com.demo.webflux.entity.mongo.User;
+import com.demo.webflux.entity.postgres.UserEntity;
 import com.demo.webflux.exception.AuthException;
 import com.demo.webflux.security.model.TokenDetails;
-import com.demo.webflux.service.UserService;
+import com.demo.webflux.service.mongo.UserServiceMongo;
+import com.demo.webflux.service.postgres.UserServiceSql;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -23,7 +25,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SecurityService {
 
-	private final UserService userService;
+	private final UserServiceSql userServiceSql;
+	private final UserServiceMongo userServiceMongo;
 	private final PasswordEncoder passwordEncoder;
 
 	@Value("${jwt.secret}")
@@ -34,7 +37,7 @@ public class SecurityService {
 	private String issuer;
 
 	public Mono<TokenDetails> authenticate(String username, String password) {
-		return userService.getUserByUserName(username)
+		return userServiceMongo.getUserByUserName(username)
 				.flatMap(user -> {
 					if(!user.isEnabled()) {
 						return Mono.error(new AuthException("Account disable: "+ username, "USER_ACCOUNT_DISABLE"));
@@ -51,6 +54,13 @@ public class SecurityService {
 	}
 
 	private TokenDetails generateToken(UserEntity user) {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("role", user.getRole());
+		claims.put("username", user.getUsername());
+
+		return generateToken(claims, user.getId().toString());
+	}
+	private TokenDetails generateToken(User user) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("role", user.getRole());
 		claims.put("username", user.getUsername());

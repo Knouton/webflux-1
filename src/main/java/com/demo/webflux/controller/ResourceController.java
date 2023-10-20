@@ -1,7 +1,8 @@
 package com.demo.webflux.controller;
 
 import com.demo.webflux.dto.ResourceDto;
-import com.demo.webflux.service.ResourceService;
+import com.demo.webflux.service.mongo.ResourceServiceMongo;
+import com.demo.webflux.service.postgres.ResourceServiceSql;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,16 +16,15 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @RequestMapping("/resource")
 public class ResourceController {
-	private final ResourceService service;
+	private final ResourceServiceMongo serviceMongo;
 
 	@GetMapping("/{id}")
-	public Mono<ResourceDto> getResource(@PathVariable Long id) {
-		return service.getResourceById(id);
+	public Mono<ResourceDto> getResource(@PathVariable String id) {
+		return serviceMongo.getResourceById(id);
 	}
 
 	@PostMapping
 	public Mono<ResourceDto> createResource(@RequestBody ResourceDto dto) {
-		return service.saveResource(dto);
+		return serviceMongo.saveResource(dto);
 	}
-
 }

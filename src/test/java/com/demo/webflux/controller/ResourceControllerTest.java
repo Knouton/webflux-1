@@ -36,10 +36,8 @@ class ResourceControllerTest {
 	private WebTestClient webTestClient;
 	@MockBean
 	ResourceServiceMongo resourceServiceMongo;
-	//private ResourceServiceSql resourceServiceSql;
 
 	@MockBean
-	//private UserServiceSql userServiceSql;
 	private UserServiceMongo userServiceMongo;
 	@MockBean
 	private SecurityService securityService;

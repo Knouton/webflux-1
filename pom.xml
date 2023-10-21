@@ -50,8 +50,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
+			<groupId>io.projectreactor.kafka</groupId>
+			<artifactId>reactor-kafka</artifactId>
 		</dependency>
 
 		<dependency>

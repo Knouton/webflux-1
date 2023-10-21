@@ -19,12 +19,10 @@ public class ResourceServiceMongo {
 
 		return repository.save(entity)
 				.map(mapper::map);
-
 	}
 
 	public Mono<ResourceDto> getResourceById(String id) {
 		return repository.findById(id)
 				.map(mapper::map);
 	}
-
 }

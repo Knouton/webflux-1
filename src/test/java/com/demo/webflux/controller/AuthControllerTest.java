@@ -32,7 +32,6 @@ class AuthControllerTest {
 	private WebTestClient webTestClient;
 	@MockBean
 	private UserServiceMongo serviceMongo;
-	//private UserServiceSql userServiceSql;
 	@MockBean
 	private SecurityService securityService;
 

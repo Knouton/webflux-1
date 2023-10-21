@@ -11,11 +11,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthEventService {
-
 	private final KafkaProducer kafkaProducer;
-
-    public void sendAuthEvent(AuthEvent authEvent) {
-
+    public void sendAuthEvent(Mono<AuthEvent> authEvent) {
 		kafkaProducer.startAuthEventMessage(authEvent);
     }
 }

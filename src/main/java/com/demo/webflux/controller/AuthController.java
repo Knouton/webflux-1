@@ -8,7 +8,6 @@ import com.demo.webflux.security.model.CustomPrincipal;
 import com.demo.webflux.security.token.SecurityService;
 import com.demo.webflux.service.adapter.AuthEventService;
 import com.demo.webflux.service.mongo.UserServiceMongo;
-import com.demo.webflux.service.postgres.UserServiceSql;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -26,27 +25,26 @@ import reactor.core.publisher.Mono;
 public class AuthController {
 
 	private final SecurityService securityService;
-	private final UserServiceSql userServiceSql;
 	private final UserServiceMongo userServiceMongo;
-
 	private final AuthEventService authEventService;
 
 	@PostMapping("/register")
 	public Mono<UserDto> register(@RequestBody UserDto userDto) {
 		log.info("register user: {}", userDto.getUsername());
-		//Mono<UserDto> registerUser = userServiceSql.registerUser(userDto);
-		Mono<UserDto> registerUser = userServiceMongo.registerUser(userDto);
-		log.info("Successful register user: {}", userDto.getUsername());
 
+		Mono<UserDto> registerUser = userServiceMongo.registerUser(userDto);
+
+		log.info("Successful register user: {}", userDto.getUsername());
 		authEventService.sendAuthEvent(
-				new AuthEvent("user " + userDto.getUsername() + " successful created"));
+				Mono.just(new AuthEvent("user " + userDto.getUsername() + " successful created")));
+
 		return registerUser;
 	}
 
 	@PostMapping("/login")
 	public Mono<AuthRespDto> login(@RequestBody AuthReqDto reqDto) {
 		authEventService.sendAuthEvent(
-				new AuthEvent("unknown user try to login" + reqDto.getUsername()));
+				Mono.just(new AuthEvent("unknown user try to login" + reqDto.getUsername())));
 
 		log.info("login user: {}", reqDto.getUsername());
 		Mono<AuthRespDto> respDto = securityService.authenticate(reqDto.getUsername(), reqDto.getPassword())
@@ -59,7 +57,7 @@ public class AuthController {
 		log.info("Successful login user: {}", reqDto.getUsername());
 
 		authEventService.sendAuthEvent(
-				new AuthEvent("user " + reqDto.getUsername() + " successful login"));
+				Mono.just(new AuthEvent("user " + reqDto.getUsername() + " successful login")));
 		return respDto;
 	}
 

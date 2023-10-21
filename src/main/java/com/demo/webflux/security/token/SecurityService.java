@@ -5,7 +5,6 @@ import com.demo.webflux.entity.postgres.UserEntity;
 import com.demo.webflux.exception.AuthException;
 import com.demo.webflux.security.model.TokenDetails;
 import com.demo.webflux.service.mongo.UserServiceMongo;
-import com.demo.webflux.service.postgres.UserServiceSql;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -25,7 +24,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SecurityService {
 
-	private final UserServiceSql userServiceSql;
 	private final UserServiceMongo userServiceMongo;
 	private final PasswordEncoder passwordEncoder;
 

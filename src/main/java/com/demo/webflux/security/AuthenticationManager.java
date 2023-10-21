@@ -4,7 +4,6 @@ import com.demo.webflux.dto.UserDto;
 import com.demo.webflux.exception.UnauthorizedException;
 import com.demo.webflux.security.model.CustomPrincipal;
 import com.demo.webflux.service.mongo.UserServiceMongo;
-import com.demo.webflux.service.postgres.UserServiceSql;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,6 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class AuthenticationManager implements ReactiveAuthenticationManager {
-	private final UserServiceSql userServiceSql;
 	private final UserServiceMongo userServiceMongo;
 
 	@Override

@@ -38,11 +38,9 @@ public class UserServiceMongo {
 						.doOnSuccess(user -> log.info("In registerUser — user: {} created", user)))
 				.map(mapper::map);
 	}
-
 	public Mono<UserDto> getUserById(String id) {
 		return repository.findById(id).map(mapper::map);
 	}
-
 	public  Mono<User> getUserByUserName(String username) {
 		return repository.findUserByUsername(username);
 	}

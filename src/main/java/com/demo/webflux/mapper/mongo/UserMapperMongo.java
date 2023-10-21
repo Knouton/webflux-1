@@ -8,7 +8,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface UserMapperMongo {
 	UserDto map(User user);
-
 	@InheritInverseConfiguration
 	User map(UserDto userDto);
 }
